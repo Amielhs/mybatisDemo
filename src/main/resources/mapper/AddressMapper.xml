@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--<mapper namespace="com.bdqn.mapper.user.UserMapper">-->
+<!--<mapper namespace="com.bdqn.mybatis.mapper">-->
+<mapper namespace="com.bdqn.mybatis.mapper.AddressMapper">
+
+    <!--查询地址记录数-->
+    <select id="count" resultType="int">
+        SELECT count(1) AS `count` FROM `smbms_address`
+    </select>
+
+    <!-- 查询地址信息 用Mapper接口方式 -->
+    <select id="getAddressList" resultType="Address">
+        SELECT * FROM `smbms_address`
+    </select>
+
+    <!--增加地址信息-->
+    <insert id="add" parameterType="Address">
+        INSERT INTO `smbms_address` (`contact`,`addressDesc` ,`postCode`,`tel`,`createdBy`,`creationDate`,`userId`)
+            VALUES (#{contact},#{addressDesc},#{postCode},#{tel},#{createdBy},#{creationDate},#{userId})
+    </insert>
+
+    <!--修改地址信息-->
+    <update id="modify" parameterType="Address">
+        UPDATE  `smbms_address` SET `contact` = #{contact},`addressDesc` = #{addressDesc},`postCode` = #{postCode},
+                `tel` = #{tel},`createdBy` = #{createdBy},`creationDate` = #{creationDate},`modifyBy` = #{modifyBy},
+                `modifyDate` = #{modifyDate},`userId` = #{userId}
+                WHERE `id` = #{id}
+    </update>
+
+    <!--根据地址ID删除地址信息-->
+    <delete id="deleteAddressById" parameterType="Integer">
+        DELETE FROM `smbms_address` WHERE `id` = #{id}
+    </delete>
+</mapper>

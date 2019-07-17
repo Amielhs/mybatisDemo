@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--<mapper namespace="com.bdqn.mapper.user.UserMapper">-->
+<!--<mapper namespace="com.bdqn.mybatis.mapper">-->
+<mapper namespace="com.bdqn.mybatis.mapper.UserMapper">
+    <!-- 查询用户表记录数 -->
+    <select id="selectUserCount" resultType="int">
+        SELECT count(1) AS `count` FROM `smbms_user`
+    </select>
+    <!--无别名的情况-->
+    <!--<select id="selectUsers" resultType="com.bdqn.mybatis.pojo.User">
+         select * from `smbms_user`
+    </select>-->
+    <!--有别名的情况-->
+    <!-- 查询用户信息 -->
+    <select id="selectUsers" resultType="User">
+        SELECT * FROM `smbms_user`
+    </select>
+    <!-- 查询用户信息通过id -->
+    <select id="selectUserById" resultType="User">
+        SELECT * FROM `smbms_user` WHERE `id` = 1
+    </select>
+
+    <!-- 查询用户信息 用Mapper接口方式 -->
+    <select id="getAllUserList" resultType="User">
+        SELECT * FROM `smbms_user`
+    </select>
+
+    <!--根据用户名称查询用户列表(模糊查询)-->
+    <select id="getUserListByUserName" resultType="User" parameterType="String">
+        SELECT * FROM `smbms_user` WHERE `userName` LIKE  CONCAT ('%',#{userName},'%')
+    </select>
+
+    <!-- 多条件查询用户列表(参数：对象入参) -->
+    <select id="getUserList" resultType="User" parameterType="User">
+		SELECT * FROM `smbms_user` WHERE `userName` LIKE CONCAT ('%',#{userName},'%') AND userRole = #{userRole}
+	</select>
+
+    <!-- 查询用户列表(参数：Map) -->
+    <!--<select id="getUserListByMap" resultType="User" parameterType="Map">
+		SELECT * FROM `smbms_user` WHERE `userName` LIKE CONCAT ('%',#{uName},'%') AND userRole = #{uRole}
+	</select>-->
+    <!--动态SQL优化-->
+    <select id="getUserListByMap" resultType="User" parameterType="Map">
+		SELECT * FROM `smbms_user`
+		<trim prefix="where" prefixOverrides="AND | OR">
+            <if test="uName!=null">
+                `userName` LIKE CONCAT ('%',#{uName},'%')
+            </if>
+            <if test="uRole!=null">
+                AND userRole = #{uRole}
+            </if>
+        </trim>
+	</select>
+
+    <!--通过多条件查询用户(包含用户角色信息)对象入参-->
+    <!--动态SQL优化-->
+    <select id="getUserListUnion" resultType="User" parameterType="User">
+		SELECT `u`.userName,`u`.userRole,`r`.roleName,`r`.roleCode FROM `smbms_user` AS `u` INNER JOIN `smbms_role` AS `r` ON  `u`.userRole = `r`.id
+        <where>
+            <if test="userName!=null and userName!=''">
+                AND `userName` LIKE CONCAT ('%',#{userName},'%')
+            </if>
+            <if test="userRole!=null">
+                AND userRole = #{userRole}
+            </if>
+        </where>
+	</select>
+
+    <!--通过多条件查询用户(包含用户角色信息)对象入参,进行分页查询-->
+    <resultMap type="User" id="UserListUnionByPage">
+        <result property="id" column="id"/>
+        <result property="userCode" column="userCode"/>
+        <result property="userName" column="userName"/>
+        <result property="phone" column="phone"/>
+        <result property="birthday" column="birthday"/>
+        <result property="gender" column="gender"/>
+        <result property="userRole" column="userRole"/>
+        <result property="creationDate" column="creationDate"/>
+        <association property="role" javaType="Role" resultMap="roleBypage"/>
+    </resultMap>
+    <select id="getUserListUnionPage" resultMap="UserListUnionByPage">
+        SELECT `u`.userName,`u`.userRole,`r`.roleName,`r`.roleCode FROM `smbms_user` AS `u`
+        INNER JOIN `smbms_role` AS `r` ON  `u`.userRole = `r`.id
+        <where>
+            <if test="user.userName!=null and user.userName!=''">
+                AND `userName` LIKE CONCAT ('%',#{user.userName},'%')
+            </if>
+            <if test="user.userRole!=null">
+                AND userRole = #{user.userRole}
+            </if>
+        </where>
+                ORDER BY `u`.`creationDate` DESC LIMIT #{from},#{pageSize}
+
+    </select>
+    <resultMap id="roleBypage" type="Role">
+        <result property="id" column="id"/>
+        <result property="roleName" column="roleName"/>
+        <result property="roleCode" column="roleCode"/>
+    </resultMap>
+
+    <!-- 当数据库中的字段信息与对象的属性不一致时需要通过resultMap来映射 -->
+    <resultMap type="User" id="userList">
+        <result property="id" column="id"/>
+        <result property="userCode" column="userCode"/>
+        <result property="userName" column="userName"/>
+        <result property="phone" column="phone"/>
+        <result property="birthday" column="birthday"/>
+        <result property="gender" column="gender"/>
+        <result property="userRole" column="userRole"/>
+        <result property="userRoleName" column="roleName"/>
+        <result property="roleCode" column="roleCode"/>
+    </resultMap>
+
+    <!--通过resultMap自定义映射查询-->
+    <select id="getResultMapUserList" resultMap="userList" parameterType="User">
+        SELECT u.*,r.roleName FROM `smbms_user` u,`smbms_role` r WHERE u.userName LIKE CONCAT ('%',#{userName},'%') AND u.userRole = #{userRole} AND u.userRole = r.id
+    </select>
+
+    <!--添加用户-->
+    <insert id="add" parameterType="User">
+        INSERT INTO `smbms_user` (`userCode`,`userName`,`userPassword`,`gender`,`birthday`,`phone`,`address`,`userRole`,`createdBy`,`creationDate`)
+	           VALUES (#{userCode},#{userName},#{userPassword},#{gender},#{birthday},#{phone},
+				#{address},#{userRole},#{createdBy},#{creationDate})
+    </insert>
+
+    <!--通过用户id，修改用户-->
+    <!--<update id="modify" parameterType="User">
+        UPDATE `smbms_user` SET `userCode`=#{userCode},`userName`=#{userName},`userPassword`=#{userPassword},
+						`gender`=#{gender},`birthday`=#{birthday},`phone`=#{phone},`address`=#{address},
+						`userRole`=#{userRole},`modifyBy`=#{modifyBy},`modifyDate`=#{modifyDate}
+		 		WHERE `id` = #{id}
+    </update>-->
+    <!--使用动态SQL优化-->
+    <update id="modify" parameterType="User">
+        UPDATE `smbms_user`
+        <trim prefix="set" suffixOverrides=",">
+            <if test="userCode!=null">`userCode`=#{userCode},</if>
+            <if test="userName!=null">`userName`=#{userName},</if>
+            <if test="userPassword!=null">`userPassword`=#{userPassword},</if>
+            <if test="gender!=null">`gender`=#{gender},</if>
+            <if test="birthday!=null">`birthday`=#{birthday},</if>
+            <if test="phone!=null">`phone`=#{phone},</if>
+            <if test="address!=null">`address`=#{address},</if>
+            <if test="userRole!=null">`userRole`=#{userRole},</if>
+            <if test="modifyBy!=null">`modifyBy`=#{modifyBy},</if>
+            <if test="modifyDate!=null">`modifyDate`=#{modifyDate},</if>
+        </trim>
+        <where>
+            <if test="id!=null">
+                `id` = #{id}
+            </if>
+        </where>
+    </update>
+
+    <!-- 通过用户id，修改用户密码 -->
+    <update id="updatePwd">
+		UPDATE `smbms_user` SET `userPassword` = #{userPassword} WHERE `id` = #{id}
+	</update>
+
+    <!--通过用户id，删除用户-->
+    <delete id="deleteUserById">
+        DELETE FROM `smbms_user` WHERE `id` = #{id}
+    </delete>
+
+    <!--使用userRoleResult联合了一个association的结果映射来加载User实例-->
+    <resultMap id="userRoleResult" type="User">
+        <id property="id" column="id"/>
+        <result property="userCode" column="userCode"/>
+        <result property="userName" column="userName"/>
+        <result property="userRole" column="userRole"/>
+        <association property="role" javaType="Role">
+            <id property="id" column="r_id"/>
+            <result property="roleCode" column="roleCode"/>
+            <result property="roleName" column="roleName"/>
+        </association>
+    </resultMap>
+    <!--根据roleId获取用户列表(association)-->
+    <select id="getUserListByRoleId" parameterType="Integer" resultMap="userRoleResult">
+        SELECT `u`.*,`r`.`id` AS `r_id`,`r`.`roleCode`,`r`.`roleName` FROM `smbms_user` `u`,`smbms_role` `r`
+				WHERE `u`.`userRole` = #{userRole} AND `u`.`userRole` = `r`.`id`
+    </select>
+
+    <!--使用userRoleResult联合了一个association的结果映射来加载User实例(此方法可以进行role结果映射复用)-->
+    <resultMap id="userRoleResultFuYong" type="User">
+        <id property="id" column="id"/>
+        <result property="userCode" column="userCode"/>
+        <result property="userName" column="userName"/>
+        <result property="userRole" column="userRole"/>
+        <association property="role" javaType="Role" resultMap="roleResult"/>
+    </resultMap>
+    <resultMap id="roleResult" type="Role">
+        <id property="id" column="r_id"/>
+        <result property="roleCode" column="roleCode"/>
+        <result property="roleName" column="roleName"/>
+    </resultMap>
+    <!--根据roleId获取用户列表(此方法可以进行role结果映射复用)-->
+    <select id="getUserListByRoleIdFuYong" parameterType="Integer" resultMap="userRoleResultFuYong">
+        SELECT `u`.*,`r`.`id` AS `r_id`,`r`.`roleCode`,`r`.`roleName` FROM `smbms_user` `u`,`smbms_role` `r`
+				WHERE `u`.`userRole` = #{userRole} AND `u`.`userRole` = `r`.`id`
+    </select>
+
+    <!--User对象内嵌集合对象(addressList)，通过collection来实现结果映射-->
+    <resultMap id="userAddressResult" type="User">
+        <id property="id" column="id"/>
+        <result property="userCode" column="userCode"/>
+        <result property="userName" column="userName"/>
+        <collection property="addressList" ofType="Address">
+            <id property="id" column="a_id"/>
+            <result property="postCode" column="postCode"/>
+            <result property="tel" column="tel"/>
+            <result property="contact" column="contact"/>
+            <result property="addressDesc" column="addressDesc"/>
+        </collection>
+    </resultMap>
+    <!--获取指定用户的地址列表(collection)-->
+    <select id="getAddressListByUserId" parameterType="Integer" resultMap="userAddressResult">
+        SELECT `u`.*,`a`.`id` AS `a_id`,`a`.`contact`,`a`.`addressDesc`,`a`.`postCode`,`a`.`tel` FROM `smbms_user` `u`,`smbms_address` `a`
+				WHERE `u`.`id` = `a`.`userId` AND `u`.`id` = #{id}
+    </select>
+
+    <!--User对象内嵌集合对象(addressList)，通过collection来实现结果映射(此方法可以进行address结果映射复用)-->
+    <resultMap id="userAddressResultFuYong" type="User">
+        <id property="id" column="id"/>
+        <result property="userCode" column="userCode"/>
+        <result property="userName" column="userName"/>
+        <collection property="addressList" ofType="Address" resultMap="addressResult"/>
+    </resultMap>
+    <resultMap id="addressResult" type="Address">
+        <id property="id" column="a_id"/>
+        <result property="postCode" column="postCode"/>
+        <result property="tel" column="tel"/>
+        <result property="contact" column="contact"/>
+        <result property="addressDesc" column="addressDesc"/>
+    </resultMap>
+    <!--获取指定用户的地址列表(collection)(此方法可以进行address结果映射复用)-->
+    <select id="getAddressListByUserIdFuYong" parameterType="Integer" resultMap="userAddressResultFuYong">
+        SELECT `u`.*,`a`.`id` AS `a_id`,`a`.`contact`,`a`.`addressDesc`,`a`.`postCode`,`a`.`tel` FROM `smbms_user` `u`,`smbms_address` `a`
+				WHERE `u`.`id` = `a`.`userId` AND `u`.`id` = #{id}
+    </select>
+
+    <!--resultMap自动映射级别(需配置<setting name="autoMappingBehavior" value="FULL"/>显示密码和用户Id)-->
+    <!--获取指定用户的地址列表(user表-address表：1对多关系)-->
+    <resultMap id="userAddressResultFuYongTest" type="User">
+        <id property="id" column="id"/>
+        <result property="userCode" column="userCode"/>
+        <result property="userName" column="userName"/>
+        <collection property="addressList" ofType="Address" resultMap="addressResultTest"/>
+    </resultMap>
+    <resultMap id="addressResultTest" type="Address">
+        <id property="id" column="a_id"/>
+        <result property="postCode" column="postCode"/>
+        <result property="tel" column="tel"/>
+        <result property="contact" column="contact"/>
+        <result property="addressDesc" column="addressDesc"/>
+    </resultMap>
+    <!--resultMap自动映射级别(需配置<setting name="autoMappingBehavior" value="FULL"/>显示密码和用户Id)-->
+    <!--获取指定用户的地址列表(user表-address表：1对多关系)-->
+    <!--<select id="getAddressListByUserIdTest" parameterType="Integer" resultMap="userAddressResultFuYongTest">
+        SELECT `u`.*,`a`.`id` AS `a_id`,`a`.`contact`,`a`.`addressDesc`,`a`.`postCode`,`a`.`tel` ,`a`.`userId` FROM `smbms_user` `u` LEFT JOIN `smbms_address` `a`
+				ON  `u`.`id` = `a`.`userId` WHERE `u`.`id` = #{id}
+    </select>-->
+    <!--用动态SQL优化-->
+    <select id="getAddressListByUserIdTest" parameterType="Integer" resultMap="userAddressResultFuYongTest">
+        SELECT `u`.*,`a`.`id` AS `a_id`,`a`.`contact`,`a`.`addressDesc`,`a`.`postCode`,`a`.`tel` ,`a`.`userId` FROM `smbms_user` `u` LEFT JOIN `smbms_address` `a`
+				ON  `u`.`id` = `a`.`userId`
+				<where>
+                    <if test="id!=null">
+                        `u`.`id` = #{id}
+                    </if>
+                </where>
+    </select>
+
+    <!--使用动态MySQL查询之前 (通过用户名和用户角色)-->
+    <!--<select id="getUserListByuserNameAnduserRole" resultMap="userList" parameterType="User">
+        SELECT u.*,r.roleName FROM `smbms_user` u,`smbms_role` r WHERE u.userName LIKE CONCAT ('%',#{userName},'%') AND u.userRole = #{userRole} AND u.userRole = r.id
+    </select>-->
+    <!--使用动态MySQL查询之后，代码已经更改 (通过用户名和用户角色)-->
+    <!--<select id="getUserListByuserNameAnduserRole" resultMap="userList" parameterType="User">
+        SELECT `u`.*,`r`.`roleName` FROM `smbms_user` u,`smbms_role` r
+            WHERE `u`.`userRole` = `r`.`id`
+            <if test="userRole!=null">
+                AND u.userRole = #{userRole}
+            </if>
+            <if test="userName!=null and userName!=''">
+                AND `u`.`userName` LIKE CONCAT ('%',#{userName},'%')
+            </if>
+    </select>-->
+
+    <!--if方法,根据用户名称(模糊查询)和角色id查询用户列表，但是用户列表不需要显示角色名称-->
+    <!--<select id="getUserListByuserNameAnduserRole" resultType="User">
+         SELECT *  FROM `smbms_user` WHERE
+            <if test="userName!=null and userName!=''">
+                `u`.`userName` LIKE CONCAT ('%',#{userName},'%')
+            </if>
+            <if test="userRole!=null">
+                AND u.userRole = #{userRole}
+            </if>
+    </select>-->
+
+    <!--if+where方法-->
+        <!--<select id="getUserListByuserNameAnduserRole" resultType="User">
+            SELECT * FROM `smbms_user`
+            <where>
+                <if test="userName!=null and userName!=''">
+                    AND `userName` LIKE CONCAT ('%',#{userName},'%')
+                </if>
+                <if test="userRole!=null">
+                    AND `userRole` = #{userRole}
+                </if>
+            </where>
+        </select>-->
+
+    <!--if+trim方法-->
+    <select id="getUserListByuserNameAnduserRole" resultType="User">
+        SELECT * FROM `smbms_user`
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="userName!=null and userName!=''">
+                AND `userName` LIKE CONCAT ('%',#{userName},'%')
+            </if>
+            <if test="userRole!=null">
+                AND `userRole` = #{userRole}
+            </if>
+        </trim>
+    </select>
+
+    <!--随机修改用户信息，不修改的则为原来的-->
+    <!--<update id="modifyBySuiJi" parameterType="User">
+        UPDATE `smbms_user`
+            <set>
+                <if test="userCode!=null">`userCode`=#{userCode},</if>
+                <if test="userName!=null">`userName`=#{userName},</if>
+                <if test="userPassword!=null">`userPassword`=#{userPassword},</if>
+                <if test="gender!=null">`gender`=#{gender},</if>
+                <if test="birthday!=null">`birthday`=#{birthday},</if>
+                <if test="phone!=null">`phone`=#{phone},</if>
+                <if test="address!=null">`address`=#{address},</if>
+                <if test="userRole!=null">`userRole`=#{userRole},</if>
+                <if test="modifyBy!=null">`modifyBy`=#{modifyBy},</if>
+                <if test="modifyDate!=null">`modifyDate`=#{modifyDate},</if>
+            </set>
+		 		WHERE `id` = #{id}
+    </update>-->
+
+    <!--随机修改用户信息用if+trim方法，不修改的则为原来的-->
+    <update id="modifyBySuiJi" parameterType="User">
+        UPDATE `smbms_user`
+        <trim prefix="set" suffixOverrides="," suffix="WHERE `id` = #{id}">
+            <if test="userCode!=null">`userCode`=#{userCode},</if>
+            <if test="userName!=null">`userName`=#{userName},</if>
+            <if test="userPassword!=null">`userPassword`=#{userPassword},</if>
+            <if test="gender!=null">`gender`=#{gender},</if>
+            <if test="birthday!=null">`birthday`=#{birthday},</if>
+            <if test="phone!=null">`phone`=#{phone},</if>
+            <if test="address!=null">`address`=#{address},</if>
+            <if test="userRole!=null">`userRole`=#{userRole},</if>
+            <if test="modifyBy!=null">`modifyBy`=#{modifyBy},</if>
+            <if test="modifyDate!=null">`modifyDate`=#{modifyDate},</if>
+        </trim>
+    </update>
+
+    <!--根据用户角色列表，获取该角色列表下用户列表信息-foreach_array-->
+    <resultMap id="userMapByRole" type="User">
+        <id property="id" column="id"/>
+        <result property="userCode" column="userCode"/>
+        <result property="userName" column="userName"/>
+    </resultMap>
+    <select id="getUserByRoleId_foreach_array" resultMap="userMapByRole">
+        SELECT * FROM `smbms_user` WHERE `userRole` IN
+            <foreach collection="array" item="roleIds" open="(" separator="," close=")">
+                #{roleIds}
+            </foreach>
+    </select>
+
+    <!--根据用户角色列表，获取该角色列表下用户列表信息-foreach_list-->
+    <select id="getUserByRoleId_foreach_list" resultMap="userMapByRole">
+        SELECT * FROM `smbms_user` WHERE `userRole` IN
+        <foreach collection="list" item="roleList" open="(" separator="," close=")">
+            #{roleList}
+        </foreach>
+    </select>
+
+    <!--根据用户角色列表和性别(多参数)，获取该角色列表下指定性别的用户列表信息-foreach_map-->
+    <select id="getUserByConditionMap_foreach_map" resultMap="userMapByRole">
+        SELECT * FROM `smbms_user` WHERE `gender` = #{gender} AND `userRole` IN
+        <foreach collection="roleIds" item="roleMap" open="(" separator="," close=")">
+            #{roleMap}
+        </foreach>
+    </select>
+
+    <!--根据用户角色列表，获取该角色列表下用户列表信息-foreach_map(单参数封装成map)-->
+    <select id="getUserByRoleId_foreach_map" resultMap="userMapByRole">
+        SELECT * FROM `smbms_user` WHERE `userRole` IN
+        <foreach collection="rKey" item="roleMap" open="(" separator="," close=")">
+            #{roleMap}
+        </foreach>
+    </select>
+
+    <!-- 查询用户列表(choose) -->
+    <select id="getUserList_choose" resultType="User">
+        SELECT * FROM `smbms_user` WHERE 1=1
+        <choose>
+            <when test="userName != null and userName != ''">
+                and userName like CONCAT ('%',#{userName},'%')
+            </when>
+            <when test="userCode != null and userCode != ''">
+                and userCode like CONCAT ('%',#{userCode},'%')
+            </when>
+            <when test="userRole != null">
+                and userRole=#{userRole}
+            </when>
+            <otherwise>
+                <!-- and YEAR(creationDate) = YEAR(NOW()) -->
+                and YEAR(creationDate) = YEAR(#{creationDate})
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 查询用户列表(分页显示) -->
+    <resultMap type="User" id="userListByPage">
+        <result property="id" column="id"/>
+        <result property="userCode" column="userCode"/>
+        <result property="userName" column="userName"/>
+        <result property="phone" column="phone"/>
+        <result property="birthday" column="birthday"/>
+        <result property="gender" column="gender"/>
+        <result property="userRole" column="userRole"/>
+        <result property="userRoleName" column="roleName"/>
+    </resultMap>
+
+    <!-- 查询用户列表(分页显示) -->
+    <select id="getUserListByPage" resultMap="userListByPage">
+        SELECT `u`.*,`r`.`roleName` FROM `smbms_user` `u`,`smbms_role` `r` WHERE `u`.`userRole` = `r`.`id`
+        <if test="userRole != null">
+            and u.userRole = #{userRole}
+        </if>
+        <if test="userName != null and userName != ''">
+            and u.userName like CONCAT ('%',#{userName},'%')
+        </if>
+        ORDER BY `creationDate` DESC LIMIT #{from},#{pageSize}
+    </select>
+</mapper>

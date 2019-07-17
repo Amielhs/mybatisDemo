@@ -1,0 +1,4 @@
+2019-6-28 09:08:05[ERROR](AroundLogger.java:26) addNewUser 方法发生异常：java.lang.RuntimeException: 为测试程序运行效果抛出的异常
+2019-6-28 09:08:05[ERROR](ErrorLogger.java:19) addNewUser方法发生异常：java.lang.RuntimeException: 为测试程序运行效果抛出的异常
+2019-6-28 10:41:37[ERROR](AroundLogger.java:29) addNewUser 方法发生异常：java.lang.NullPointerException
+2019-6-28 10:41:37[ERROR](ErrorLogger.java:19) addNewUser方法发生异常：java.lang.NullPointerException

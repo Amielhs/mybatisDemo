@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+       <!-- 扫描包中注解标注的类 -->
+       <context:component-scan base-package="com.bdqn.mybatis.service,com.bdqn.mybatis.mapper" />
+
+    <!--******************测试Spring Ioc容器的相关设置 开始************************-->
+    <!-- 通过bean元素声明需要Spring创建的实例。该实例的类型通过class属性指定，并通过id属性为该实例指定一个名称，以便在程序中使用 -->
+    <!--<bean class="com.bdqn.mybatis.pojo.HelloSpring" id="helloSpring">-->
+        <!--在HelloSpring 中注入user和entity和product,使用了p标签-->
+    <bean class="com.bdqn.mybatis.pojo.HelloSpring" id="helloSpring" p:user-ref="user" p:testEntity-ref="entity">
+        <!-- property元素用来为实例的属性赋值,此处实际是调用setWho()方法实现赋值操作 -->
+        <!--<property name="name" value="world"/>-->
+        <!--构造注入-->
+        <constructor-arg name="name" value="你好"/>
+        <!--第二种方式-->
+        <!-- property元素用来为实例的属性赋值,此处实际是调用setWho()方法实现赋值操作 -->
+        <!--<property name="who">
+            &lt;!&ndash; 此处将字符串"Spring"赋值给who属性 &ndash;&gt;
+            <value>Spring</value>
+        </property>-->
+    </bean>
+    <!--******************测试Spring Ioc容器的相关设置 结束************************-->
+
+    <!--******************测试Spring Ioc容器注入的相关设置 开始************************-->
+    <!--定义bean，该bean的id是zhangGa(张嘎)，class指定该bean实例的实现类-->
+    <!--<bean class="com.bdqn.mybatis.pojo.Greeting" id="zhangGa">
+        &lt;!&ndash;property元素用来指定需要容器注入的属性，person属性需要容器注入，Greeting类必须拥有setPerson()方法&ndash;&gt;
+        <property name="person" value="张嘎"/>
+        &lt;!&ndash;words属性需要容器注入，Greeting类必须拥有setWords()方法&ndash;&gt;
+        <property name="words" value="三天不打小鬼子，手就痒痒"/>
+    </bean>
+    &lt;!&ndash;定义bean，该bean的id是rod，class指定该bean实例的实现类&ndash;&gt;
+    <bean class="com.bdqn.mybatis.pojo.Greeting" id="rod">
+        &lt;!&ndash;property元素用来指定需要容器注入的属性，person属性需要容器注入，Greeting类必须拥有setPerson()方法&ndash;&gt;
+        <property name="person" value="Rod"/>
+        &lt;!&ndash;words属性需要容器注入，Greeting类必须拥有setWords()方法&ndash;&gt;
+        <property name="words" value="世界上有10种人，认识二进制的和不认识二进制的。"/>
+    </bean>-->
+    <!--******************测试Spring Ioc容器注入的相关设置 结束************************-->
+
+    <!--******************测试Spring Ioc容器注入的业务相关设置 开始************************-->
+    <!-- 定义彩色墨盒bean，该bean的id是colorInk，class指定该bean实例的实现类 -->
+    <!--<bean class="com.bdqn.mybatis.printer.ink.ColorInk" id="colorInk"/>
+    &lt;!&ndash; 定义灰色墨盒bean，该bean的id是greyInk，class指定该bean实例的实现类 &ndash;&gt;
+    <bean class="com.bdqn.mybatis.printer.ink.GreyInk" id="greyInk"/>
+
+    &lt;!&ndash; 定义B5纸张bean，该bean的id是b5Paper，class指定该bean实例的实现类 &ndash;&gt;
+    <bean class="com.bdqn.mybatis.printer.paper.TextPaper" id="b5Paper">
+        &lt;!&ndash; property元素用来指定需要容器注入的属性，charPerLine需要容器注入， TextPaper类必须拥有setCharPerLine()方法。注入每行字符数 &ndash;&gt;
+        <property name="charPerLine" value="5"/>
+        &lt;!&ndash; property元素用来指定需要容器注入的属性，linePerPage需要容器注入， TextPaper类必须拥有setLinePerPage()方法。注入每页行数 &ndash;&gt;
+        <property name="linePerPage" value="3"/>
+    </bean>
+    &lt;!&ndash; 定义A4纸张bean，该bean的id是A4Paper，class指定该bean实例的实现类 &ndash;&gt;
+    <bean class="com.bdqn.mybatis.printer.paper.TextPaper" id="a4Paper">
+        &lt;!&ndash; property元素用来指定需要容器注入的属性，charPerLine需要容器注入， TextPaper类必须拥有setCharPerLine()方法。注入每行字符数 &ndash;&gt;
+        <property name="charPerLine" value="10"/>
+        &lt;!&ndash; property元素用来指定需要容器注入的属性，linePerPage需要容器注入， TextPaper类必须拥有setLinePerPage()方法。注入每页行数 &ndash;&gt;
+        <property name="linePerPage" value="3"/>
+    </bean>
+    &lt;!&ndash; 组装打印机。定义打印机bean，该bean的id是printer， class指定该bean实例的实现类 &ndash;&gt;
+    <bean id="printer" class="com.bdqn.mybatis.printer.printer.Printer">
+        &lt;!&ndash; 通过ref属性注入已经定义好的bean &ndash;&gt;
+        &lt;!&ndash; 注入彩色墨盒 &ndash;&gt;
+        <property name="ink" ref="colorInk"/>
+        &lt;!&ndash;<property name="ink" ref="greyInk"/>&ndash;&gt;
+        &lt;!&ndash; 注入B5打印纸张 &ndash;&gt;
+        <property name="paper" ref="b5Paper"/>
+        &lt;!&ndash;<property name="paper" ref="a4Paper"/>&ndash;&gt;
+    </bean>-->
+    <!--******************测试Spring Ioc容器注入的业务相关设置 结束************************-->
+
+    <!--******************测试Spring Ioc容器注入的业务相关设置 开始************************-->
+    <!--将UserMapper的实现类作为Spring的bean组件，放入到Spring Ioc容器中，让Spring Ioc容器创建对象-->
+    <!--<bean id="userMapper" class="com.bdqn.mybatis.mapper.impl.UserMapperImpl"/>
+    &lt;!&ndash; 将业务实现类作为Spring的bean组件，放入到Spring IoC容器中，让Spring IoC容器帮助创建对象，同时实现依赖注入，即将UserMapper对象注入到UserService业务接口中&ndash;&gt;
+    <bean id="userService" class="com.bdqn.mybatis.service.impl.UserServiceImpl">
+        <property name="userMapper" ref="userMapper"/>
+    </bean>-->
+
+    <!--将UserMapper的实现类作为Spring的bean组件，放入到Spring Ioc容器中，让Spring Ioc容器创建对象-->
+    <!--<bean id="userMapper" class="com.bdqn.mybatis.mapper.impl.UserMapperImpl"/>
+    &lt;!&ndash; 将业务实现类作为Spring的bean组件，放入到Spring IoC容器中，让Spring IoC容器帮助创建对象，同时实现依赖注入，即将UserMapper对象注入到UserService业务接口中&ndash;&gt;
+    <bean id="userService" class="com.bdqn.mybatis.service.impl.UserServiceImpl">
+        &lt;!&ndash;通过定义的单参构造为userService的userMapper属性赋值&ndash;&gt;
+        <constructor-arg ref="userMapper"/>
+    </bean>-->
+    <!--******************测试Spring Ioc容器注入的业务相关设置 结束************************-->
+
+    <!--******************测试Spring p命名空间改进配置 开始************************-->
+    <!--使用p命名空间改进配置，使用前要注意先添加p命名空间的声明-->
+    <bean id="user" class="com.bdqn.mybatis.pojo.User" p:id="1" p:gender="1" p:phone="15692324581"/>
+    <!--将UserMapper的实现类作为Spring的bean组件，放入到Spring Ioc容器中，让Spring Ioc容器创建对象-->
+    <!--<bean id="userMapper" class="com.bdqn.mybatis.mapper.impl.UserMapperImpl"/>
+    &lt;!&ndash; 将业务实现类作为Spring的bean组件，放入到Spring IoC容器中，让Spring IoC容器帮助创建对象，同时实现依赖注入，即将UserMapper对象注入到UserService业务接口中&ndash;&gt;
+    <bean id="userService" class="com.bdqn.mybatis.service.impl.UserServiceImpl" p:userMapper-ref="userMapper"/>-->
+    <!--******************测试Spring p命名空间改进配置 结束************************-->
+
+    <!--******************SprintAOP相关配置 开始************************-->
+    <!--SprintAOP相关配置-->
+    <!--<bean id="serviceLogger" class="com.bdqn.mybatis.aop.ServiceLogger"/>
+    &lt;!&ndash;配置切面&ndash;&gt;
+    <aop:config>
+        &lt;!&ndash; 定义切入点 &ndash;&gt;
+        <aop:pointcut id="pointcut" expression="execution(public Integer addNewUser(com.bdqn.mybatis.pojo.User))"/>
+        &lt;!&ndash; 引用包含增强方法的Bean &ndash;&gt;
+        <aop:aspect ref="serviceLogger">
+            &lt;!&ndash; 将before()方法定义为前置增强并引用pointcut切入点 &ndash;&gt;
+            <aop:before method="before" pointcut-ref="pointcut"/>
+            &lt;!&ndash; 将afterReturning()方法定义为后置增强并引用pointcut切入点 &ndash;&gt;
+            &lt;!&ndash; 通过returning属性指定为名为result的参数注入返回值 &ndash;&gt;
+            <aop:after-returning method="afterReturning" pointcut-ref="pointcut" returning="result" />
+        </aop:aspect>
+    </aop:config>-->
+    <!--使用注解的形式实现Spring AOP的功能-->
+    <!--<bean class="com.bdqn.mybatis.aop.ServiceLogger"/>
+    <aop:aspectj-autoproxy/>-->
+    <!--******************SprintAOP相关配置 开始************************-->
+
+    <!--******************增强方法所在的Bean，实现异常抛出增强 开始************************-->
+    <!--声明增强方法所在的Bean，实现异常抛出增强-->
+    <!--<bean id="errorLogger" class="com.bdqn.mybatis.aop.ErrorLogger"/>
+    &lt;!&ndash;配置切面&ndash;&gt;
+    <aop:config>
+        &lt;!&ndash;定义切入点&ndash;&gt;
+        <aop:pointcut id="pointcut" expression="execution(public Integer addNewUser(com.bdqn.mybatis.pojo.User))"/>
+        &lt;!&ndash; 引用包含增强方法的Bean &ndash;&gt;
+        <aop:aspect ref="errorLogger">
+            &lt;!&ndash; 将afterThrowing()方法定义为异常抛出增强并引用pointcut切入点 &ndash;&gt;
+            &lt;!&ndash;通过throwing属性指定为名为e的参数注入异常实例&ndash;&gt;
+            <aop:after-throwing method="afterThrowing" pointcut-ref="pointcut" throwing="e"/>
+        </aop:aspect>
+    </aop:config>-->
+    <!--使用注解的形式实现Spring AOP的功能-->
+    <!--<bean class="com.bdqn.mybatis.aop.ErrorLogger"/>
+    <aop:aspectj-autoproxy/>-->
+    <!--******************增强方法所在的Bean，实现异常抛出增强 结束************************-->
+
+    <!--******************增强方法所在的Bean，实现最终增强 开始************************-->
+    <!-- 声明增强方法所在的Bean，实现最终增强 -->
+    <!--<bean id="afterLogger" class="com.bdqn.mybatis.aop.AfterLogger"/>
+    &lt;!&ndash; 配置切面 &ndash;&gt;
+    <aop:config>
+        &lt;!&ndash; 定义切入点 &ndash;&gt;
+        <aop:pointcut id="pointcut" expression="execution(public Integer addNewUser(com.bdqn.mybatis.pojo.User))" />
+        &lt;!&ndash; 引用包含增强方法的Bean &ndash;&gt;
+        <aop:aspect ref="afterLogger">
+            &lt;!&ndash; 将afterLogger()方法定义为最终增强并引用pointcut切入点 &ndash;&gt;
+            <aop:after method="afterLogger" pointcut-ref="pointcut"/>
+        </aop:aspect>
+    </aop:config>-->
+    <!--使用注解的形式实现Spring AOP的功能-->
+    <!--<bean class="com.bdqn.mybatis.aop.AfterLogger"/>
+    <aop:aspectj-autoproxy/>-->
+    <!--******************增强方法所在的Bean，实现最终增强 结束************************-->
+
+    <!--******************增强方法所在的Bean，实现环绕增强 开始************************-->
+    <!-- 声明增强方法所在的Bean，实现环绕增强 -->
+    <!--<bean id="aroundLogger" class="com.bdqn.mybatis.aop.AroundLogger"/>
+    &lt;!&ndash; 配置切面 &ndash;&gt;
+    <aop:config>
+        &lt;!&ndash; 定义切入点 &ndash;&gt;
+        <aop:pointcut id="pointcut" expression="execution(public Integer addNewUser(com.bdqn.mybatis.pojo.User))" />
+        &lt;!&ndash; 引用包含增强方法的Bean &ndash;&gt;
+        <aop:aspect ref="aroundLogger">
+            &lt;!&ndash; 将aroundLogger()方法定义为环绕增强并引用pointcut切入点 &ndash;&gt;
+            <aop:around method="aroundLogger" pointcut-ref="pointcut"/>
+        </aop:aspect>
+    </aop:config>-->
+    <!--使用注解的形式实现Spring AOP的功能-->
+    <bean class="com.bdqn.mybatis.aop.AroundLogger"/>
+    <aop:aspectj-autoproxy/>
+    <!--******************增强方法所在的Bean，实现环绕增强 结束************************-->
+
+    <!--******************注入直接量（基本数据类型、字符串） 开始************************-->
+    <!--注入直接量（基本数据类型、字符串）-->
+    <!--使用<value>子元素注入字符串，基本数据类型及其包装类-->
+    <!--<bean id="user" class="com.bdqn.mybatis.pojo.User">
+        <property name="id" value="1"/>
+        <property name="gender" value="2"/>
+    </bean>-->
+    <!--******************注入直接量（基本数据类型、字符串） 结束************************-->
+
+    <!--******************使用<![CDATA[]]>标记处理XML特殊字符 开始************************-->
+    <!--使用<![CDATA[]]>标记处理XML特殊字符-->
+   <!-- <bean id="product" class="com.bdqn.mybatis.pojo.Product">
+        <property name="productName">
+            <value>高露洁牙膏</value>
+        </property>
+        <property name="brand">
+            <value><![CDATA[P&G]]></value>
+        </property>
+    </bean>-->
+    <!--******************使用<![CDATA[]]>标记处理XML特殊字符 结束************************-->
+
+    <!--把XML特殊字符替换为实体引用-->
+    <!--<bean id="product" class="com.bdqn.mybatis.pojo.Product">
+        <property name="productName" value="高露洁牙膏"/>
+        <property name="brand" value="P&amp;G"/>
+    </bean>-->
+
+    <!--引入其他Bean组件-->
+     <!--定义UserMapperImpl对象,并指定id为userMapper2
+    <bean id="userMapper2" class="com.bdqn.mybatis.mapper.impl.UserMapperImpl"/>
+    &lt;!&ndash; 定义UserServiceImpl对象,并指定id为userService &ndash;&gt;
+    <bean id="userService2" class="com.bdqn.mybatis.service.impl.UserServiceImpl">
+        &lt;!&ndash;为userService的dao属性赋值，需要注意的是，这里要调用setDao()方法&ndash;&gt;
+        <property name="userMapper">
+            &lt;!&ndash;<ref bean="userMapper2"/>&ndash;&gt;
+            <ref local="userMapper2"/>
+        </property>
+    </bean>-->
+
+    <!--使用内部Bean-->
+     <!--定义UserServiceImpl对象,并指定id为userService
+    <bean id="userService" class="com.bdqn.mybatis.service.impl.UserServiceImpl">
+        &lt;!&ndash;为userService的userMapper属性赋值，需要注意的是，这里要调用setUserMapper()方法&ndash;&gt;
+        <property name="userMapper">
+            定义userMapper对象
+            <bean class="com.bdqn.mybatis.mapper.impl.UserMapperImpl"/>
+        </property>
+    </bean>-->
+
+    <!--注入集合类型的属性-->
+    <bean id="entity" class="com.bdqn.mybatis.pojo.TestEntity">
+        <!-- 使用<![CDATA[]]>标记处理XML特 殊字符 -->
+        <property name="specialCharacter1">
+            <value><![CDATA[P&G]]></value>
+        </property>
+        <!-- 把XML特殊字符替换为实体引用 -->
+        <property name="specialCharacter2">
+            <value>P&amp;G</value>
+        </property>
+        <!-- 定义内部Bean -->
+        <property name="innerBean">
+            <bean class="com.bdqn.mybatis.pojo.User">
+                <property name="phone" value="15692324581"/>
+            </bean>
+        </property>
+        <!-- 注入List类型 -->
+        <property name="list">
+            <list>
+                <!-- 定义List中的元素 -->
+                <value>足球</value>
+                <value>篮球</value>
+            </list>
+        </property>
+        <!-- 注入数组类型 -->
+        <property name="array">
+            <list>
+                <!-- 定义数组中的元素 -->
+                <value>足球</value>
+                <value>篮球</value>
+            </list>
+        </property>
+        <!-- 注入Set类型 -->
+        <property name="set">
+            <set>
+                <!-- 定义Set或数组中的元素 -->
+                <value>足球</value>
+                <value>篮球</value>
+            </set>
+        </property>
+        <!-- 注入Map类型 -->
+        <property name="map">
+            <map>
+                <!-- 定义Map中的键值对 -->
+                <entry>
+                    <key>
+                        <value>football</value>
+                    </key>
+                    <value>足球</value>
+                </entry>
+                <entry>
+                    <key>
+                        <value>basketball</value>
+                    </key>
+                    <value>篮球</value>
+                </entry>
+            </map>
+        </property>
+        <!-- 注入Properties类型 -->
+        <property name="props">
+            <props>
+                <!-- 定义Properties中的键值对 -->
+                <prop key="football">足球</prop>
+                <prop key="basketball">篮球</prop>
+            </props>
+        </property>
+        <!-- 注入空字符串值 -->
+        <property name="emptyValue">
+            <value></value>
+        </property>
+        <!-- 注入null值 -->
+        <property name="nullValue">
+            <null/>
+        </property>
+    </bean>
+</beans>
